@@ -32,16 +32,17 @@ MODES = {
     "short":     ("Reply in a sentence or two.",                                  8, 48),
     "paragraph": ("Reply at length, in a full paragraph.",                       40, 150),
 }
-# per-author temperament: how likely to pass / quip / speak briefly / expound.
+# per-author temperament: a LIGHT lean only — every author keeps a real chance at
+# every length, so all of them vary from one-line quips to full paragraphs.
 # weights over (pass, quip, short, paragraph).
 DISPOSITION = {
-    "dickinson":  (0.20, 0.45, 0.25, 0.10),   # terse, gnomic — quips, often silent
-    "weil":       (0.20, 0.10, 0.30, 0.40),   # measured, essayistic
-    "dostoevsky": (0.10, 0.15, 0.30, 0.45),   # can't help expounding
-    "hugo":       (0.10, 0.05, 0.25, 0.60),   # orator — long
-    "tolstoy":    (0.15, 0.10, 0.30, 0.45),
+    "dickinson":  (0.15, 0.35, 0.30, 0.20),   # leans terse, but can expound
+    "weil":       (0.15, 0.20, 0.30, 0.35),   # leans essayistic, but can quip
+    "dostoevsky": (0.12, 0.22, 0.30, 0.36),
+    "hugo":       (0.12, 0.20, 0.28, 0.40),   # leans long, but can quip
+    "tolstoy":    (0.13, 0.22, 0.30, 0.35),
 }
-DEFAULT_DISP = (0.15, 0.20, 0.35, 0.30)
+DEFAULT_DISP = (0.15, 0.25, 0.30, 0.30)
 
 
 def main():
