@@ -6,7 +6,7 @@ authors/le_guin/data/chat/
 
 # Model + training artifacts (regenerable from scripts)
 authors/*/model/
-authors/*/chat_model/
+authors/*/chat_model*/
 **/checkpoints/
 results/
 *.bin
