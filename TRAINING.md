@@ -35,6 +35,16 @@ Runs on Apple MPS (M-series GPU). No CUDA / bitsandbytes needed.
    an *Instruct* model supervised-fine-tuned on a conversational dataset, so you
    can actually talk back-and-forth with the author.
 
+### Web UI (Gradio)
+```bash
+uv pip install --python .venv gradio     # once
+.venv/bin/python scripts/app.py          # then open http://127.0.0.1:7860
+```
+Loads the base once + all adapters; **Chat** tab (pick an author, multi-turn) and
+**Salon** tab (topic → the authors converse, variable length, streaming).
+CLI equivalents: `scripts/chat.py <author>`, `scripts/salon.py "<topic>"`,
+`scripts/compare.py "<question>"`.
+
 ### Chat workflow (Path B — proper conversational SFT)
 ```bash
 # 1. Build a Q&A dataset by "reverse instruction": real author passages become the
