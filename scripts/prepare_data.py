@@ -63,17 +63,33 @@ def strip_gutenberg_novel(text: str) -> str:
     closely by real prose — this skips both the table of contents (headings followed
     by more headings) and any translator's preface (prose with no heading)."""
     text = re.sub(r"\[[^\]]*\]", "", text)                          # [Illustration: ...]
+    # Gutenberg endnote back-matter: "<n> (return) <gloss>" blocks (the "(return)"
+    # is the footnote's link-back text). Drop each from its marker to the next
+    # blank line so multi-line glosses go too — all translator apparatus, not voice.
+    text = re.sub(r"(?ms)^\s*\d+ \(return\).*?(?=\n\s*\n|\Z)", "", text)
     # novel start = first structural heading followed (within ~30 lines) by a real
     # PROSE PARAGRAPH (>=50 words in one block). A table of contents is many short
     # lines (no single long paragraph), so TOC headings don't trigger it; a
     # translator's preface has no structural heading, so it's skipped too.
     lines = text.split("\n")
-    for i, ln in enumerate(lines):
-        if _HEADING.match(ln):
-            chunk = "\n".join(lines[i + 1:i + 30])
-            if any(len(p.split()) >= 50 for p in re.split(r"\n\s*\n", chunk)):
-                lines = lines[i:]
-                break
+
+    def find_start(strip_indent: bool) -> int | None:
+        for i, ln in enumerate(lines):
+            if _HEADING.match(ln.lstrip() if strip_indent else ln):
+                chunk = "\n".join(lines[i + 1:i + 30])
+                if any(len(p.split()) >= 50 for p in re.split(r"\n\s*\n", chunk)):
+                    return i
+        return None
+
+    # Prefer column-0 headings: real chapter heads sit at col 0 while the table of
+    # contents is indented, so strict matching skips the TOC. Fall back to
+    # indent-tolerant matching only if that finds nothing — some editions (e.g.
+    # Notre-Dame de Paris) indent the ENTIRE body, so no heading is ever at col 0.
+    start = find_start(strip_indent=False)
+    if start is None:
+        start = find_start(strip_indent=True)
+    if start is not None:
+        lines = lines[start:]
     text = "\n".join(lines)
     # strip structural headings (UPPERCASE incl. em-dashes) + title-case numbered ones
     text = re.sub(r"(?m)^\s*(VOLUME|BOOK|CHAPTER|PART|PROLOGUE|EPILOGUE)\b.*$", "", text)
@@ -102,9 +118,12 @@ def strip_dickinson_poems(text: str) -> str:
 def strip_gutenberg(text: str) -> str:
     """Drop Project Gutenberg license header/footer if present."""
     start = re.search(r"\*\*\* ?START OF (THE|THIS) PROJECT GUTENBERG.*?\*\*\*", text, re.I)
-    end = re.search(r"\*\*\* ?END OF (THE|THIS) PROJECT GUTENBERG.*?\*\*\*", text, re.I)
     if start:
         text = text[start.end():]
+    # search END *after* trimming the front — end.start() must index the current
+    # string, not the original, or the cut lands start.end() chars too late and
+    # leaks the END marker + trailing license boilerplate.
+    end = re.search(r"\*\*\* ?END OF (THE|THIS) PROJECT GUTENBERG.*?\*\*\*", text, re.I)
     if end:
         text = text[:end.start()]
     return text
