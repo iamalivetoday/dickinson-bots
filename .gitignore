@@ -27,3 +27,6 @@ authors/*/chats/
 
 # Generated comparison reports
 authors/comparison_*.md
+
+# Generated salon transcripts
+authors/salon_*.md
