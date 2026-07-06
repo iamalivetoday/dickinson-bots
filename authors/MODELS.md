@@ -9,7 +9,7 @@ each adapter's `BASE_MODEL.txt`. 1.5B adapters are backed up at
 |--------|-----------|-------:|--------:|-----------:|---------|
 | Weil | Qwen2.5-7B-Instruct | ~517k words | 600 | 2.625 | 2026-07-06 |
 | Dickinson | Qwen2.5-7B-Instruct | 27.7k words | 403 | 3.40 | 2026-07-03 |
-| Hugo | Qwen2.5-7B-Instruct | ~739k words | 600 | 2.573 | 2026-07-06 |
+| Hugo | Qwen2.5-7B-Instruct | ~739k words | 600 | 2.56 | 2026-07-06 |
 | Dostoevsky | Qwen2.5-7B-Instruct | ~552k words | 600 | 2.448 | 2026-07-06 |
 | Tolstoy | Qwen2.5-7B-Instruct | ~911k words | 600 | 2.448 | 2026-07-06 |
 
