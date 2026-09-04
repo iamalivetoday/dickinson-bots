@@ -65,34 +65,26 @@ actors:
         ActorRegistry.load(cfg)
 
 
-def test_local_backend_requires_base(tmp_path):
+def test_backend_is_required(tmp_path):
     cfg = write_yaml(tmp_path / "actors.yaml", """
 actors:
-  - id: no-base
-    backend: local
+  - id: no-backend
 """)
-    with pytest.raises(ActorConfigError, match="requires 'base'"):
+    with pytest.raises(ActorConfigError, match="missing a string 'backend'"):
         ActorRegistry.load(cfg)
 
 
-def test_anthropic_backend_requires_model(tmp_path):
-    cfg = write_yaml(tmp_path / "actors.yaml", """
-actors:
-  - id: no-model
-    backend: anthropic
-""")
-    with pytest.raises(ActorConfigError, match="requires 'model'"):
-        ActorRegistry.load(cfg)
-
-
-def test_unknown_backend_rejected(tmp_path):
+def test_registry_is_substrate_agnostic_any_backend_name_is_accepted(tmp_path):
+    """The registry doesn't hardcode which backends exist — a not-yet-wired
+    backend name is a router/main-wiring concern, not a config error, so
+    onboarding a new backend never means teaching the registry about it."""
     cfg = write_yaml(tmp_path / "actors.yaml", """
 actors:
   - id: x
-    backend: made-up
+    backend: some-future-backend
 """)
-    with pytest.raises(ActorConfigError, match="backend must be one of"):
-        ActorRegistry.load(cfg)
+    registry = ActorRegistry.load(cfg)
+    assert registry.get("x").backend == "some-future-backend"
 
 
 def test_empty_registry_rejected(tmp_path):

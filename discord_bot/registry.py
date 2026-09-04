@@ -16,8 +16,6 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG_PATH = REPO_ROOT / "config" / "actors.yaml"
 
-VALID_BACKENDS = {"local", "anthropic", "fake"}
-
 
 class ActorConfigError(ValueError):
     """A malformed or ambiguous entry in an actor registry file."""
@@ -89,18 +87,15 @@ def _build_actor(entry: dict[str, Any], defaults: dict[str, Any]) -> Actor:
         raise ActorConfigError(f"actor entry missing a string 'id': {entry!r}")
 
     backend = entry.pop("backend", None)
-    if backend not in VALID_BACKENDS:
-        raise ActorConfigError(
-            f"actor {actor_id!r}: backend must be one of {sorted(VALID_BACKENDS)}, "
-            f"got {backend!r}"
-        )
+    if not backend or not isinstance(backend, str):
+        raise ActorConfigError(f"actor {actor_id!r} missing a string 'backend': {entry!r}")
 
+    # The registry doesn't know what a given backend needs (a local backend
+    # wants 'base', anthropic wants 'model', a future backend wants
+    # something else) — that validation belongs to the backend itself, at
+    # generate() time, so onboarding a new backend never means teaching the
+    # registry about it.
     generation = {**defaults.get(backend, {}), **entry.pop("generation", {})}
-
-    if backend == "local" and not entry.get("base"):
-        raise ActorConfigError(f"actor {actor_id!r}: local backend requires 'base'")
-    if backend == "anthropic" and not entry.get("model"):
-        raise ActorConfigError(f"actor {actor_id!r}: anthropic backend requires 'model'")
 
     try:
         return Actor(id=actor_id, backend=backend, generation=generation, **entry)
