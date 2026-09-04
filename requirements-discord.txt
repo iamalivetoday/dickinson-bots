@@ -1,0 +1,10 @@
+# Dependencies for discord_bot/ (separate from the original lessons'/scripts'
+# ad-hoc setup — see TRAINING.md). Install into the existing .venv:
+#   uv pip install --python .venv -r requirements-discord.txt
+pyyaml
+torch
+transformers
+peft
+accelerate
+anthropic
+aiosqlite
