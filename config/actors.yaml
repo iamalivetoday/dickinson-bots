@@ -1,0 +1,79 @@
+# Declarative actor registry: persona x substrate.
+#
+# An "actor" is a configuration — a persona optionally paired with a model
+# backend — not a running thing. Rooms instantiate actors as participants
+# (discord_bot/rooms/), possibly more than once (e.g. two independent
+# `opus-4.8` instances in the same room).
+#
+# Onboarding a new actor on an *already-supported* backend (local or
+# anthropic) only requires adding an entry here — no code changes.
+#
+# Fields:
+#   id         unique actor id; also the Discord webhook username unless a
+#              room needs to disambiguate duplicate instances (adds ":a"/":b")
+#   backend    "local" (transformers + optional PEFT adapter) or "anthropic"
+#   persona    key into scripts/persona.py's SYSTEM dict; omit for a
+#              persona-less base-model actor (e.g. plain "opus-4.8")
+#   base       (local only) HF model id of the shared base
+#   adapter    (local only, optional) path to a LoRA adapter dir, relative
+#              to the repo root; omit to talk to the bare base model
+#   model      (anthropic only) Anthropic model id
+#   avatar     (optional) image URL for the actor's webhook avatar
+#   generation (optional) per-actor overrides merged over `defaults.<backend>`
+
+defaults:
+  local:
+    device: auto            # auto -> mps if available, else cpu
+    max_new_tokens: 220
+    min_new_tokens: 1
+    temperature: 0.7
+    top_p: 0.9
+    repetition_penalty: 1.2
+  anthropic:
+    max_tokens: 512
+    temperature: 1.0
+
+actors:
+  # --- local: LoRA adapters over the shared Qwen2.5-7B-Instruct base ---
+  # (adapters are gitignored binaries — see authors/MODELS.md and
+  # docs/ACTOR_ONBOARDING.md for how to (re)train them on this machine)
+  - id: weil
+    persona: weil
+    backend: local
+    base: Qwen/Qwen2.5-7B-Instruct
+    adapter: authors/weil/chat_model
+
+  - id: dickinson
+    persona: dickinson
+    backend: local
+    base: Qwen/Qwen2.5-7B-Instruct
+    adapter: authors/dickinson/chat_model
+
+  - id: hugo
+    persona: hugo
+    backend: local
+    base: Qwen/Qwen2.5-7B-Instruct
+    adapter: authors/hugo/chat_model
+
+  - id: dostoevsky
+    persona: dostoevsky
+    backend: local
+    base: Qwen/Qwen2.5-7B-Instruct
+    adapter: authors/dostoevsky/chat_model
+
+  - id: tolstoy
+    persona: tolstoy
+    backend: local
+    base: Qwen/Qwen2.5-7B-Instruct
+    adapter: authors/tolstoy/chat_model
+
+  # --- anthropic: same personas, a different substrate ---
+  - id: weil-opus-4.8
+    persona: weil
+    backend: anthropic
+    model: claude-opus-4-8
+
+  # --- anthropic: persona-less base-model actor ---
+  - id: opus-4.8
+    backend: anthropic
+    model: claude-opus-4-8
