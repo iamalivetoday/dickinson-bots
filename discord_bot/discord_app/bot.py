@@ -22,7 +22,6 @@ log = logging.getLogger(__name__)
 INTENTS = discord.Intents.default()
 INTENTS.message_content = True  # required to read plain messages in voice/room channels
 INTENTS.guilds = True
-INTENTS.members = True  # for @-mention -> display name resolution
 
 
 class SalonBot(discord.Client):
