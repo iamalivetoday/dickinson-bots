@@ -168,6 +168,41 @@ async def test_increment_turn_count(store):
 
 
 @pytest.mark.asyncio
+async def test_get_room_by_channel(store):
+    room = await store.create_room("Weil's channel", "reply")
+    assert await store.get_room_by_channel("chan-1") is None
+
+    await store.bind_discord_channel(room.id, "guild-1", "chan-1")
+    found = await store.get_room_by_channel("chan-1")
+    assert found.id == room.id
+
+
+@pytest.mark.asyncio
+async def test_get_room_by_channel_ignores_closed_rooms(store):
+    room = await store.create_room("Weil's channel", "reply")
+    await store.bind_discord_channel(room.id, "guild-1", "chan-1")
+    await store.close_room(room.id)
+    assert await store.get_room_by_channel("chan-1") is None
+
+
+@pytest.mark.asyncio
+async def test_webhook_binding_roundtrip_and_upsert(store):
+    assert await store.get_webhook_binding("chan-1") is None
+
+    saved = await store.save_webhook_binding("chan-1", "wh-1", "tok-1")
+    assert saved.webhook_id == "wh-1"
+    fetched = await store.get_webhook_binding("chan-1")
+    assert fetched.webhook_id == "wh-1"
+    assert fetched.webhook_token == "tok-1"
+
+    updated = await store.save_webhook_binding("chan-1", "wh-2", "tok-2")
+    assert updated.webhook_id == "wh-2"
+    fetched_again = await store.get_webhook_binding("chan-1")
+    assert fetched_again.webhook_id == "wh-2"
+    assert fetched_again.webhook_token == "tok-2"
+
+
+@pytest.mark.asyncio
 async def test_data_survives_a_restart(tmp_path):
     """Simulates a bot restart: close the connection, reopen the same file,
     and confirm rooms/participants/messages/turn state are all still there.

@@ -8,3 +8,5 @@ peft
 accelerate
 anthropic
 aiosqlite
+discord.py>=2.4
+python-dotenv

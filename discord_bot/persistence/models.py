@@ -108,6 +108,23 @@ class TurnState:
         )
 
 
+@dataclass(frozen=True)
+class WebhookBinding:
+    channel_id: str
+    webhook_id: str
+    webhook_token: str
+    created_at: str
+
+    @classmethod
+    def from_row(cls, row) -> "WebhookBinding":
+        return cls(
+            channel_id=row["channel_id"],
+            webhook_id=row["webhook_id"],
+            webhook_token=row["webhook_token"],
+            created_at=row["created_at"],
+        )
+
+
 def display_names(participants: list[Participant]) -> dict[str, str]:
     """Map participant id -> Discord-facing display name.
 

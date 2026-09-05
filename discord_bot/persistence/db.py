@@ -54,6 +54,17 @@ CREATE TABLE IF NOT EXISTS turn_state (
     cursor_json           TEXT NOT NULL DEFAULT '{}',   -- turn-policy-specific cursor (e.g. round-robin index)
     updated_at            TEXT NOT NULL
 );
+
+-- One webhook per Discord channel (a webhook posts under any username/
+-- avatar per-message, so a channel never needs more than one). The token
+-- is a bearer credential for that webhook — this table is gitignored
+-- (see .env.example / docs) exactly like the rest of this database.
+CREATE TABLE IF NOT EXISTS webhooks (
+    channel_id     TEXT PRIMARY KEY,
+    webhook_id     TEXT NOT NULL,
+    webhook_token  TEXT NOT NULL,
+    created_at     TEXT NOT NULL
+);
 """
 
 

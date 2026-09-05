@@ -15,7 +15,7 @@ from typing import Any
 import aiosqlite
 
 from . import db
-from .models import Message, Participant, Room, TurnState
+from .models import Message, Participant, Room, TurnState, WebhookBinding
 
 _MAX_INSTANCES_PER_ACTOR = 26  # 'a'..'z' — plenty for any real room
 
@@ -114,6 +114,13 @@ class RoomStore:
             (guild_id, channel_id, room_id),
         )
         await self._conn.commit()
+
+    async def get_room_by_channel(self, channel_id: str) -> Room | None:
+        cur = await self._conn.execute(
+            "SELECT * FROM rooms WHERE discord_channel_id = ? AND status = 'active'", (channel_id,)
+        )
+        row = await cur.fetchone()
+        return Room.from_row(row) if row else None
 
     # -- participants -----------------------------------------------------
 
@@ -260,6 +267,30 @@ class RoomStore:
         )
         await self._conn.commit()
         return new_count
+
+    # -- webhook bindings -----------------------------------------------------
+
+    async def get_webhook_binding(self, channel_id: str) -> WebhookBinding | None:
+        cur = await self._conn.execute(
+            "SELECT * FROM webhooks WHERE channel_id = ?", (channel_id,)
+        )
+        row = await cur.fetchone()
+        return WebhookBinding.from_row(row) if row else None
+
+    async def save_webhook_binding(self, channel_id: str, webhook_id: str, webhook_token: str) -> WebhookBinding:
+        created_at = _now()
+        await self._conn.execute(
+            """INSERT INTO webhooks (channel_id, webhook_id, webhook_token, created_at)
+               VALUES (?, ?, ?, ?)
+               ON CONFLICT (channel_id) DO UPDATE SET webhook_id = excluded.webhook_id,
+                   webhook_token = excluded.webhook_token""",
+            (channel_id, webhook_id, webhook_token, created_at),
+        )
+        await self._conn.commit()
+        return WebhookBinding(
+            channel_id=channel_id, webhook_id=webhook_id, webhook_token=webhook_token,
+            created_at=created_at,
+        )
 
     # -- internal -----------------------------------------------------------
 
