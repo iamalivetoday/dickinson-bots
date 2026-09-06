@@ -1,0 +1,27 @@
+# Actor registry for the LIVE acceptance test only (tests/live/).
+#
+# Every actor here uses the deterministic `fake` backend: no network, no
+# model weights, no GPU — the same transcript always produces the same
+# reply, so the live test can assert on exact message text.
+#
+# These ids are deliberately prefixed `test-` so anything they create in
+# `the flesh door` is obviously temporary and can be cleaned up by exact
+# name. Never point the real bot at this file.
+
+defaults:
+  fake:
+    max_new_tokens: 64
+
+actors:
+  - id: test-weil
+    persona: weil
+    backend: fake
+
+  - id: test-hugo
+    persona: hugo
+    backend: fake
+
+  # Persona-less, and used twice in one room by the live test to exercise
+  # duplicate instances (test-echo / test-echo:b).
+  - id: test-echo
+    backend: fake

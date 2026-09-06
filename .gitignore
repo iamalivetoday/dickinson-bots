@@ -37,3 +37,6 @@ data/
 *.sqlite3
 *.sqlite3-journal
 .playwright-auth/
+
+# Live Discord test artifacts (screenshots may show private conversations)
+tests/live/artifacts/
