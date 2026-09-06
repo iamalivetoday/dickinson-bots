@@ -45,6 +45,13 @@ Loads the base once + all adapters; **Chat** tab (pick an author, multi-turn) an
 CLI equivalents: `scripts/chat.py <author>`, `scripts/salon.py "<topic>"`,
 `scripts/compare.py "<question>"`.
 
+### Discord
+The bots also run as a private Discord server, where each actor gets its own
+username/avatar and several can converse in one room — see
+[`docs/DISCORD.md`](docs/DISCORD.md), and
+[`docs/ACTOR_ONBOARDING.md`](docs/ACTOR_ONBOARDING.md) for adding an actor.
+Same adapters and same `persona.py` prompts as the CLI and Gradio app.
+
 ### Chat workflow (Path B — proper conversational SFT)
 ```bash
 # 1. Build a Q&A dataset by "reverse instruction": real author passages become the
