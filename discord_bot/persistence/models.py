@@ -125,6 +125,23 @@ class WebhookBinding:
         )
 
 
+@dataclass(frozen=True)
+class VoiceChannelBinding:
+    actor_id: str
+    channel_id: str
+    room_id: str
+    created_at: str
+
+    @classmethod
+    def from_row(cls, row) -> "VoiceChannelBinding":
+        return cls(
+            actor_id=row["actor_id"],
+            channel_id=row["channel_id"],
+            room_id=row["room_id"],
+            created_at=row["created_at"],
+        )
+
+
 def display_names(participants: list[Participant]) -> dict[str, str]:
     """Map participant id -> Discord-facing display name.
 

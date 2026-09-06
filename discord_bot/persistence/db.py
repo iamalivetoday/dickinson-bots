@@ -65,6 +65,18 @@ CREATE TABLE IF NOT EXISTS webhooks (
     webhook_token  TEXT NOT NULL,
     created_at     TEXT NOT NULL
 );
+
+-- Which Discord channel is each actor's standing 1:1 "voice channel"
+-- (bound to a "reply"-policy room via room_id). Keyed by actor id rather
+-- than channel name/id, so a channel that gets renamed or moved back and
+-- forth by sync is still recognized as the same actor's — see
+-- discord_app/channels.py.
+CREATE TABLE IF NOT EXISTS voice_channels (
+    actor_id    TEXT PRIMARY KEY,
+    channel_id  TEXT NOT NULL,
+    room_id     TEXT NOT NULL REFERENCES rooms(id),
+    created_at  TEXT NOT NULL
+);
 """
 
 

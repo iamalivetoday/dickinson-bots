@@ -15,7 +15,7 @@ from typing import Any
 import aiosqlite
 
 from . import db
-from .models import Message, Participant, Room, TurnState, WebhookBinding
+from .models import Message, Participant, Room, TurnState, VoiceChannelBinding, WebhookBinding
 
 _MAX_INSTANCES_PER_ACTOR = 26  # 'a'..'z' — plenty for any real room
 
@@ -291,6 +291,31 @@ class RoomStore:
             channel_id=channel_id, webhook_id=webhook_id, webhook_token=webhook_token,
             created_at=created_at,
         )
+
+    # -- voice channel bindings -----------------------------------------------
+
+    async def get_voice_channel(self, actor_id: str) -> VoiceChannelBinding | None:
+        cur = await self._conn.execute(
+            "SELECT * FROM voice_channels WHERE actor_id = ?", (actor_id,)
+        )
+        row = await cur.fetchone()
+        return VoiceChannelBinding.from_row(row) if row else None
+
+    async def save_voice_channel(self, actor_id: str, channel_id: str, room_id: str) -> VoiceChannelBinding:
+        created_at = _now()
+        await self._conn.execute(
+            """INSERT INTO voice_channels (actor_id, channel_id, room_id, created_at)
+               VALUES (?, ?, ?, ?)
+               ON CONFLICT (actor_id) DO UPDATE SET channel_id = excluded.channel_id,
+                   room_id = excluded.room_id""",
+            (actor_id, channel_id, room_id, created_at),
+        )
+        await self._conn.commit()
+        return VoiceChannelBinding(actor_id=actor_id, channel_id=channel_id, room_id=room_id, created_at=created_at)
+
+    async def all_voice_channels(self) -> list[VoiceChannelBinding]:
+        cur = await self._conn.execute("SELECT * FROM voice_channels ORDER BY actor_id")
+        return [VoiceChannelBinding.from_row(row) for row in await cur.fetchall()]
 
     # -- internal -----------------------------------------------------------
 

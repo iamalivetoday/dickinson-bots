@@ -203,6 +203,32 @@ async def test_webhook_binding_roundtrip_and_upsert(store):
 
 
 @pytest.mark.asyncio
+async def test_voice_channel_binding_roundtrip_and_upsert(store):
+    assert await store.get_voice_channel("weil") is None
+
+    room = await store.create_room("weil voice channel", "reply")
+    saved = await store.save_voice_channel("weil", "chan-1", room.id)
+    assert saved.channel_id == "chan-1"
+    fetched = await store.get_voice_channel("weil")
+    assert fetched.channel_id == "chan-1"
+    assert fetched.room_id == room.id
+
+    updated = await store.save_voice_channel("weil", "chan-2", room.id)
+    assert updated.channel_id == "chan-2"
+    assert (await store.get_voice_channel("weil")).channel_id == "chan-2"
+
+
+@pytest.mark.asyncio
+async def test_all_voice_channels_lists_every_binding(store):
+    room = await store.create_room("voices", "reply")
+    await store.save_voice_channel("weil", "chan-1", room.id)
+    await store.save_voice_channel("hugo", "chan-2", room.id)
+
+    bindings = await store.all_voice_channels()
+    assert {b.actor_id for b in bindings} == {"weil", "hugo"}
+
+
+@pytest.mark.asyncio
 async def test_data_survives_a_restart(tmp_path):
     """Simulates a bot restart: close the connection, reopen the same file,
     and confirm rooms/participants/messages/turn state are all still there.
