@@ -115,6 +115,14 @@ class RoomStore:
         )
         await self._conn.commit()
 
+    async def set_turn_policy_config(self, room_id: str, config: dict[str, Any]) -> None:
+        await self._require_room(room_id)
+        await self._conn.execute(
+            "UPDATE rooms SET turn_policy_config = ? WHERE id = ?",
+            (json.dumps(config), room_id),
+        )
+        await self._conn.commit()
+
     async def get_room_by_channel(self, channel_id: str) -> Room | None:
         cur = await self._conn.execute(
             "SELECT * FROM rooms WHERE discord_channel_id = ? AND status = 'active'", (channel_id,)

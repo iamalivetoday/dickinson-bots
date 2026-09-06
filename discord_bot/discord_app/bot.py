@@ -13,8 +13,10 @@ from discord_bot.persistence.store import RoomStore
 from discord_bot.registry import ActorRegistry
 from discord_bot.rooms.orchestrator import RoomOrchestrator
 
+from .commands import register as register_commands
 from .config import Settings
 from .router import IncomingMessage, MessageRouter
+from .service import RoomService
 from .webhooks import WebhookManager
 
 log = logging.getLogger(__name__)
@@ -44,7 +46,9 @@ class SalonBot(discord.Client):
             allowed_guild_id=settings.allowed_guild_id,
             allowed_user_ids=settings.allowed_user_ids,
         )
+        self.service = RoomService(store, self.orchestrator, registry)
         self.tree = discord.app_commands.CommandTree(self)
+        register_commands(self)
 
     async def setup_hook(self) -> None:
         if self.settings.allowed_guild_id:

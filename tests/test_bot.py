@@ -47,6 +47,17 @@ class _NullAsyncCtx:
         return False
 
 
+def test_every_command_registers_on_the_tree():
+    """Guards against a command silently failing to attach (a decorator
+    typo, a bad annotation discord.py rejects at registration time)."""
+    bot = make_bot()
+    assert sorted(c.name for c in bot.tree.get_commands()) == [
+        "chat", "debate", "models", "next", "room", "salon", "sync-models",
+    ]
+    room = next(c for c in bot.tree.get_commands() if c.name == "room")
+    assert sorted(s.name for s in room.commands) == ["add", "create", "remove", "status"]
+
+
 @pytest.mark.asyncio
 async def test_webhook_messages_never_reach_the_router():
     bot = make_bot()
